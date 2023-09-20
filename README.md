@@ -10,7 +10,7 @@ git clone git@github.com:kzolti/sqlite3_pb_ext_example.git \
 Run cmake and build 
 ```
 mkdir -p build && cd build \
-&& cmake .. && cmake --build . \
+&& cmake .. && cmake --build .
 ```
 
 Run example:
