@@ -73,29 +73,32 @@ int main(int argc, char *argv[])
         sqlite3_close(db);
         return 1;
     }
+
+    // Upload person table 1 000 000 records (20 x 50 000)
+    const int total_records = 1000000;
     const char* query = "SELECT COUNT(*) FROM person;";
-    sqlite3_stmt* statement;
-    rc = sqlite3_prepare_v2(db, query, -1, &statement, nullptr);
+    sqlite3_stmt* row_count_stmt;
+    rc = sqlite3_prepare_v2(db, query, -1, &row_count_stmt, nullptr);
 
     if (rc != SQLITE_OK) {
         std::cerr << "Query preparation error: " << sqlite3_errmsg(db) << std::endl;
         sqlite3_close(db);
         return rc;
     }
-
-    // Upload person table 1 000 000 records
-    rc = sqlite3_step(statement);
+    rc = sqlite3_step(row_count_stmt);
     if (rc == SQLITE_ROW) {
-        int rowCount = sqlite3_column_int(statement, 0);
+        int rowCount = sqlite3_column_int(row_count_stmt, 0);
         if (rowCount == 0) {
             std::cout << "The 'person' table is empty, Upload 1 000 000 records ..."<<std::endl;
             const char *insertSql = "INSERT OR REPLACE INTO person (id, proto) VALUES (?, ?)";
             sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
-            for (int status_counter = 0; status_counter < 20; ++status_counter) {
-                for (int i = 1; i <= 50000; ++i) {
-                    const int id=status_counter*50000+i;
-                    sqlite3_stmt *stmt;
-                    rc = sqlite3_prepare_v2(db, insertSql, -1, &stmt, NULL);
+            const int status_step = 20;
+
+            for (int status_counter = 0; status_counter < status_step; ++status_counter) {
+                for (int i = 1; i <= total_records / status_step; ++i) {
+                    const int id=status_counter * total_records / status_step + i;
+                    sqlite3_stmt *insert_stmt;
+                    rc = sqlite3_prepare_v2(db, insertSql, -1, &insert_stmt, NULL);
                     if (rc != SQLITE_OK) {
                         cerr << "Error preparing statement: " << sqlite3_errmsg(db) <<endl;
                         sqlite3_close(db);
@@ -126,32 +129,33 @@ int main(int argc, char *argv[])
                     person.set_allocated_last_updated(update);
 
                     const std::string serialized = person.SerializeAsString();
-                    sqlite3_bind_int(stmt, 1, id);
-                    sqlite3_bind_blob(stmt, 2, serialized.data(), serialized.size(), SQLITE_STATIC);
-                    rc = sqlite3_step(stmt);
+                    sqlite3_bind_int(insert_stmt, 1, id);
+                    sqlite3_bind_blob(insert_stmt, 2, serialized.data(), serialized.size(), SQLITE_STATIC);
+                    rc = sqlite3_step(insert_stmt);
                     if (rc == SQLITE_DONE) {
-                        sqlite3_finalize(stmt);
+                        sqlite3_finalize(insert_stmt);
                     }else{
                         cerr << "Error inserting data: " << sqlite3_errmsg(db) <<endl;
-                        sqlite3_finalize(stmt);
+                        sqlite3_finalize(insert_stmt);
                         sqlite3_close(db);
                         return 1;
                     }
                 }
                 std::cout<<"\r - Inserting records: "<< status_counter*5<<" %  "<<std::flush;
             }
-            std::cout<<std::endl;
             sqlite3_exec(db, "COMMIT;", 0, 0, 0);
+            std::cout<<"\r - Inserting records: "<< 100<<" %  "<<std::flush;
+            std::cout<<std::endl;
         } else {
             std::cout << "There are "<< std::to_string(rowCount) <<" records in the person table" << std::endl;
         }
     } else {
         std::cerr << "Query execution error: " << sqlite3_errmsg(db) << std::endl;
     }
-    sqlite3_finalize(statement);
+    sqlite3_finalize(row_count_stmt);
 
     // run query
-    const std::string person_name="John Doe " + std::to_string(rand() % 1000000 + 1);
+    const std::string person_name="John Doe " + std::to_string(rand() % total_records + 1);
     const std::string sql = "SELECT  "
                             "id "
                             ", pb_extract(person.value, person.type_name, 'name') name "
