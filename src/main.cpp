@@ -88,54 +88,59 @@ int main(int argc, char *argv[])
     if (rc == SQLITE_ROW) {
         int rowCount = sqlite3_column_int(statement, 0);
         if (rowCount == 0) {
-            std::cout << "The 'person' table is empty, Upload 1 000 000 records ..." << std::endl;
+            std::cout << "The 'person' table is empty, Upload 1 000 000 records ..."<<std::endl;
             const char *insertSql = "INSERT OR REPLACE INTO person (id, proto) VALUES (?, ?)";
             sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
-            for (int i = 1; i <= 1000000; ++i) {
-                sqlite3_stmt *stmt;
-                rc = sqlite3_prepare_v2(db, insertSql, -1, &stmt, NULL);
-                if (rc != SQLITE_OK) {
-                    cerr << "Error preparing statement: " << sqlite3_errmsg(db) <<endl;
-                    sqlite3_close(db);
-                    return 1;
-                }
-                tutorial::Person person;
-                person.set_id(i);
-                std::string name="John Doe " + std::to_string(i);
-                person.set_name(name);
-                std::string email="john.doe_" + std::to_string(i) + "@example.com";
-                person.set_email(email);
-                tutorial::Person::PhoneNumber *phone = person.add_phones();
-                std::string number="555-" + std::to_string(i) + "-0";
-                phone->set_number(number);
-                tutorial::Person::PhoneType type = tutorial::Person::PhoneType(tutorial::Person::PhoneType::Person_PhoneType_HOME);
-                phone->set_type(type);
-                const int to = std::rand() % 5 + 3;
-                for (int j = 1; j < to; ++j) {
+            for (int status_counter = 0; status_counter < 20; ++status_counter) {
+                for (int i = 1; i <= 50000; ++i) {
+                    const int id=status_counter*50000+i;
+                    sqlite3_stmt *stmt;
+                    rc = sqlite3_prepare_v2(db, insertSql, -1, &stmt, NULL);
+                    if (rc != SQLITE_OK) {
+                        cerr << "Error preparing statement: " << sqlite3_errmsg(db) <<endl;
+                        sqlite3_close(db);
+                        return 1;
+                    }
+                    tutorial::Person person;
+                    person.set_id(id);
+                    std::string name="John Doe " + std::to_string(id);
+                    person.set_name(name);
+                    std::string email="john.doe_" + std::to_string(id) + "@example.com";
+                    person.set_email(email);
                     tutorial::Person::PhoneNumber *phone = person.add_phones();
-                    std::string number="555-" + std::to_string(i) + "-" + std::to_string(j);
+                    std::string number="555-" + std::to_string(id) + "-0";
                     phone->set_number(number);
-                    tutorial::Person::PhoneType type = tutorial::Person::PhoneType(std::rand() % 3);
+                    tutorial::Person::PhoneType type = tutorial::Person::PhoneType(tutorial::Person::PhoneType::Person_PhoneType_HOME);
                     phone->set_type(type);
-                }
-                google::protobuf::Timestamp *update = new google::protobuf::Timestamp();
-                update->set_seconds(i);
-                update->set_nanos(i % 1000);
-                person.set_allocated_last_updated(update);
+                    const int to = std::rand() % 5 + 3;
+                    for (int j = 1; j < to; ++j) {
+                        tutorial::Person::PhoneNumber *phone = person.add_phones();
+                        std::string number="555-" + std::to_string(id) + "-" + std::to_string(j);
+                        phone->set_number(number);
+                        tutorial::Person::PhoneType type = tutorial::Person::PhoneType(std::rand() % 3);
+                        phone->set_type(type);
+                    }
+                    google::protobuf::Timestamp *update = new google::protobuf::Timestamp();
+                    update->set_seconds(id);
+                    update->set_nanos(id % 1000);
+                    person.set_allocated_last_updated(update);
 
-                const std::string serialized = person.SerializeAsString();
-                sqlite3_bind_int(stmt, 1, i);
-                sqlite3_bind_blob(stmt, 2, serialized.data(), serialized.size(), SQLITE_STATIC);
-                rc = sqlite3_step(stmt);
-                if (rc == SQLITE_DONE) {
-                    sqlite3_finalize(stmt);
-                }else{
-                    cerr << "Error inserting data: " << sqlite3_errmsg(db) <<endl;
-                    sqlite3_finalize(stmt);
-                    sqlite3_close(db);
-                    return 1;
+                    const std::string serialized = person.SerializeAsString();
+                    sqlite3_bind_int(stmt, 1, id);
+                    sqlite3_bind_blob(stmt, 2, serialized.data(), serialized.size(), SQLITE_STATIC);
+                    rc = sqlite3_step(stmt);
+                    if (rc == SQLITE_DONE) {
+                        sqlite3_finalize(stmt);
+                    }else{
+                        cerr << "Error inserting data: " << sqlite3_errmsg(db) <<endl;
+                        sqlite3_finalize(stmt);
+                        sqlite3_close(db);
+                        return 1;
+                    }
                 }
+                std::cout<<"\r - Inserting records: "<< status_counter*5<<" %  "<<std::flush;
             }
+            std::cout<<std::endl;
             sqlite3_exec(db, "COMMIT;", 0, 0, 0);
         } else {
             std::cout << "There are "<< std::to_string(rowCount) <<" records in the person table" << std::endl;
@@ -146,19 +151,21 @@ int main(int argc, char *argv[])
     sqlite3_finalize(statement);
 
     // run query
+    const std::string person_name="John Doe " + std::to_string(rand() % 1000000 + 1);
     const std::string sql = "SELECT  "
-               "id "
-               ", pb_extract(person.value, person.type_name, 'name') name "
-               ", pb_extract(phone.value, phone.type_name, 'number') phone_number "
-               "FROM person AS person_t"
-               ", pb_field(proto, 'tutorial.Person','') person"
-               ", pb_each(person.value, person.type_name, 'phones') phone  "
-               ", pb_field(phone.value, phone.type_name, 'type') phone_type  "
-               " WHERE "
-               "pb_extract(proto,'tutorial.Person','name')='John Doe " + std::to_string(rand() % 1000000 + 1) + "'"
-               " AND phone_type.type_name='tutorial.Person.PhoneType.HOME'"
-               ";"
+                            "id "
+                            ", pb_extract(person.value, person.type_name, 'name') name "
+                            ", pb_extract(phone.value, phone.type_name, 'number') phone_number "
+                            "FROM person AS person_t"
+                            ", pb_field(proto, 'tutorial.Person','') person"
+                            ", pb_each(person.value, person.type_name, 'phones') phone  "
+                            ", pb_field(phone.value, phone.type_name, 'type') phone_type  "
+                            " WHERE "
+                            "pb_extract(proto,'tutorial.Person','name')='" + person_name + "'"
+                                            " AND phone_type.type_name='tutorial.Person.PhoneType.HOME'"
+                                            ";"
         ;
+    std::cout<<"\nHome phones from '"<<person_name<<"' "<<std::endl;
     rc = sqlite3_exec(db, sql.c_str(), callback, nullptr, &zErrMsg);
     if( rc != SQLITE_OK ){
         cerr<< "SQL error:"<< zErrMsg<<endl;
