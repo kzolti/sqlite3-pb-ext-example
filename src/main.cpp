@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <sqlite3.h>
 #include <string>
-#include "../proto/gen/addressbook.pb.h"
+#include "../proto/generate_from_sqlite3_pb_ext/addressbook.pb.h"
 using namespace std;
 
 // print sqlite output
