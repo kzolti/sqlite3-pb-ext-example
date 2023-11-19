@@ -42,7 +42,7 @@ endif()
 
 add_subdirectory(${SQLITE3_PB_EXT_DIR} sqlite3_pb_ext)
 
-add_executable(sqlite_pb_ext_example src/main.cpp proto/gen/addressbook.pb.h proto/gen/addressbook.pb.cc)
+add_executable(sqlite_pb_ext_example src/main.cpp proto/generate_from_sqlite3_pb_ext/addressbook.pb.h proto/generate_from_sqlite3_pb_ext/addressbook.pb.cc)
 add_dependencies(sqlite_pb_ext_example sqlite3_pb_ext)
 target_link_libraries(sqlite_pb_ext_example sqlite3_pb_ext ${Protobuf_LIBRARIES} ${SQLite3_LIBRARIES})
 
