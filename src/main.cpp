@@ -1,8 +1,9 @@
+// get binary directory from cmake config
 #include <iostream>
 #include <iomanip>
 #include <sqlite3.h>
 #include <string>
-#include "../proto/generated_from_sqlite3_pb_ext/addressbook.pb.h"
+#include "addressbook.pb.h"
 using namespace std;
 
 // print sqlite output
@@ -39,16 +40,10 @@ int main(int argc, char *argv[])
         // enable extension load
         sqlite3_db_config(db,SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION,1,NULL);
     }
-// get binary directory from cmake config
-#ifdef CMAKE_CURRENT_BINARY_DIR
-    std::string currentBinaryDir = CMAKE_CURRENT_BINARY_DIR;
-#else
-    cerr<<"not defined CMAKE_CURRENT_BINARY_DIR"<<endl;
-    sqlite3_close(db);
-    return 1;
-#endif
     // load extension
     char *zErrMsg = nullptr;
+#ifdef CMAKE_CURRENT_BINARY_DIR
+    std::string currentBinaryDir = CMAKE_CURRENT_BINARY_DIR;
     rc = sqlite3_load_extension(db, std::string(currentBinaryDir + "/sqlite3_pb_ext/lib/system_sqlite3/libsqlite3_pb_ext").c_str(), nullptr, &zErrMsg);
     if( rc != SQLITE_OK ){
         cerr<< "SQL error:"<< zErrMsg<<endl;
@@ -63,7 +58,7 @@ int main(int argc, char *argv[])
         sqlite3_close(db);
         return 1;
     }
-    // create table 
+    // create table
     const char *createPersonIdx = "CREATE INDEX IF NOT EXISTS person_name_idx ON person (pb_extract(proto,'tutorial.Person','name') ASC);";
     rc = sqlite3_exec(db, createPersonIdx, NULL, NULL, NULL);
     if (rc == SQLITE_OK) {
@@ -175,11 +170,17 @@ int main(int argc, char *argv[])
         cerr<< "SQL error:"<< zErrMsg<<endl;
         sqlite3_free(zErrMsg);
     }
-    
+
     if(sqlite3_close(db)){
         std::cerr<<"sqlite3 closing err";
         return 1;
     }
+#else
+    cerr<<"not defined CMAKE_CURRENT_BINARY_DIR"<<endl;
+    sqlite3_close(db);
+    return 1;
+#endif
+
 
     std::cout<<"\n-=END=- "<<std::endl;
     return 0;
