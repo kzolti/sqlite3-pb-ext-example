@@ -1,4 +1,3 @@
-// get binary directory from cmake config
 #include <iostream>
 #include <iomanip>
 #include <sqlite3.h>
