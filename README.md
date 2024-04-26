@@ -17,3 +17,18 @@ Run example:
 ```
 ./sqlite_pb_ext_example
 ```
+output:
+```
+Opened database successfully
+Create person_name_idx ..
+The 'person' table is empty, Upload 1 000 000 records ...
+ - Inserting records: 100 %  
+
+Home phones from 'John Doe 873820' 
+                      id                    name            phone_number
+                  873820         John Doe 873820            555-873820-0
+                      id                    name            phone_number
+                  873820         John Doe 873820            555-873820-6
+
+-=END=-
+```
