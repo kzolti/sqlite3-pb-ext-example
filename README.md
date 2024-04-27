@@ -1,23 +1,24 @@
 # sqlite3_pb_ext_example
-example for sqlite3_pb_ext_gen project
-
-Init repo
+Example for [sqlite3_pb_ext_gen](https://github.com/kzolti/sqlite3_pb_ext/) project
+### Dependencies:  
+protobuf-compiler(proto), sqlite3_pb_ext_gen  
+### Init repo
 ```
 git clone git@github.com:kzolti/sqlite3_pb_ext_example.git \
 && cd sqlite3_pb_ext_example 
 ```
 
-Run cmake and build 
+### Run cmake and build 
 ```
 mkdir -p build && cd build \
 && cmake .. && cmake --build .
 ```
 
-Run example:
+### Run example:
 ```
 ./sqlite_pb_ext_example
 ```
-output:
+### output:
 ```
 Opened database successfully
 Create person_name_idx ..
