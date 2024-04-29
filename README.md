@@ -1,11 +1,11 @@
-# sqlite3_pb_ext_example
-Example for [sqlite3_pb_ext_gen](https://github.com/kzolti/sqlite3_pb_ext/) project
+# sqlite3-pb-ext-example
+Example for [sqlite3-pb-ext-gen](https://github.com/kzolti/sqlite3-pb-ext-gen/) project
 ### Dependencies:  
-protobuf-compiler(proto), sqlite3_pb_ext_gen  
+protobuf-compiler(proto), sqlite3-pb-ext-gen  
 ### Init repo
 ```
-git clone git@github.com:kzolti/sqlite3_pb_ext_example.git \
-&& cd sqlite3_pb_ext_example 
+git clone git@github.com:kzolti/sqlite3-pb-ext-example.git \
+&& cd sqlite3-pb-ext-example 
 ```
 
 ### Run cmake and build 
