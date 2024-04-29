@@ -16,7 +16,7 @@ mkdir -p build && cd build \
 
 ### Run example:
 ```
-./sqlite_pb_ext_example
+./sqlite-pb-ext-example
 ```
 ### output:
 ```
