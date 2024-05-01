@@ -10,11 +10,11 @@ set(SQLITE3_PB_EXT_DIR ${CMAKE_CURRENT_BINARY_DIR}/deps/sqlite3_pb_ext)
 if(NOT EXISTS ${SQLITE3_PB_EXT_DIR})
     message("Set sqlite3_pb_ext_directory: ${SQLITE3_PB_EXT_DIR}")
     execute_process(
-        COMMAND "sqlite3_pb_ext_gen" --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto --out_path=${SQLITE3_PB_EXT_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto
+        COMMAND "sqlite3-pb-ext-gen" --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto --out_path=${SQLITE3_PB_EXT_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/proto/*.proto
         RESULT_VARIABLE RESULT
     )
     if(NOT RESULT EQUAL 0)
-        message(FATAL_ERROR "Command failed: sqlite3_pb_ext_gen --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto -o${SQLITE3_PB_EXT_DIR} *.proto")
+        message(FATAL_ERROR "Command failed: sqlite3-pb-ext-gen --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/proto -o${SQLITE3_PB_EXT_DIR} *.proto")
     endif()
 endif()
 
