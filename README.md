@@ -4,8 +4,8 @@ Example for [sqlite3-pb-ext-gen](https://github.com/kzolti/sqlite3-pb-ext-gen/) 
 protobuf-compiler(proto), sqlite3-pb-ext-gen  
 ### Init repo
 ```
-git clone https://github.com/kzolti/sqlite3-pb-ext-example.git \
-&& cd sqlite3-pb-ext-example 
+git clone https://github.com/kzolti/sqlite3-pb-ext-example.git && \
+cd sqlite3-pb-ext-example 
 ```
 
 ### Run cmake and build 
