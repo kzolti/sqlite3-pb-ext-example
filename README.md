@@ -10,8 +10,8 @@ cd sqlite3-pb-ext-example
 
 ### Run cmake and build 
 ```
-mkdir -p build && cd build \
-&& cmake .. && cmake --build .
+mkdir -p build && cd build && \
+cmake .. && cmake --build .
 ```
 
 ### Run example:
