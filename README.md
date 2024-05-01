@@ -16,7 +16,7 @@ cmake .. && cmake --build .
 
 ### Run example:
 ```
-./sqlite-pb-ext-example
+./sqlite_pb_ext_example
 ```
 ### output:
 ```
